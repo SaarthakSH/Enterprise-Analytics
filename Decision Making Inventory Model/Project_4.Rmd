@@ -1,0 +1,205 @@
+---
+title: ""
+output: html_document
+---
+
+```{r libraries, message=FALSE, warning=FALSE}
+
+#Libraries used
+library(fitdistrplus)
+library(logspline)
+
+```
+
+
+```{r First Task Part}
+
+#The annual demand for inventory
+annual_demand = 15500
+
+#The unit cost for inventory
+unit_cost = 78
+
+#The unit holding cost for inventory
+unit_holding_cost = (17.5/100)
+
+#Supplier ordering cost
+supplier_ordering_cost = 225
+
+#No. of days in a year.
+days = 365
+
+#Creating a sequence for order quantity from 100 to 10000 and increasing them by 100
+order_quantity = seq(100, 10000, by = 100)
+
+#Using that sequence and values which we choose before to calculate the total cost
+total_cost = (order_quantity * ((unit_cost * unit_holding_cost)/days) * (order_quantity/(annual_demand/days)) * (annual_demand/order_quantity)) +
+  (supplier_ordering_cost * (annual_demand/order_quantity))
+
+#Plotting a graph based on these values
+plot(order_quantity, total_cost, 'l', main = "Total Cost vs Order Quantity", xlab = "Order Quantity", ylab = "Total Cost")
+
+#Now we are gonna zoom in to get a clearer picture of the result. 
+order_quantity = seq(300, 700, by = 40)
+
+total_cost = (order_quantity * ((unit_cost* unit_holding_cost)/days) * (order_quantity/(annual_demand/days)) * (annual_demand/order_quantity)) +
+  (supplier_ordering_cost * (annual_demand/order_quantity))
+
+plot(order_quantity, total_cost, 'l', main = "Cost vs Quantity", xlab = "Quantity", ylab = "Cost")
+
+#Checking minimum values for total cost and order quantity
+idx = which.min(total_cost)
+total_cost[idx]
+order_quantity[idx]
+
+```
+
+
+```{r First Task Part Two}
+
+#First we select an interval where you want the optimize function to look for minimum
+My_interval = c(300, 800)
+
+#Next we will define the model/function.
+My_func = function(order_quantity) (order_quantity * ((unit_cost* unit_holding_cost)/days) * (order_quantity/(annual_demand/days)) * (annual_demand/order_quantity)) +
+  (supplier_ordering_cost * (annual_demand/order_quantity))
+
+#Next we will use both the interval and function to figure the optimized minimum value. We are minimizing cost or some measure of risk here
+My_optimized_value = optimise(f = My_func, 
+                              interval = My_interval,
+                              lower = min(My_interval),
+                              upper = max(My_interval),
+                              maximum = FALSE) #Because we are calculating min.
+
+# Results of optimization.
+paste('Optimized(Minimum) Order Quantity = ', My_optimized_value$minimum)
+paste('Optimized(Minimum) Total Cost = ', My_optimized_value$objective)
+
+```
+
+
+```{r Second Task}
+
+#Parameters for Triangular Distribution. 
+lower_limit = 12000
+upper_limit = 18000
+peak_limit = 16000
+
+#Generating random numbers using the runif function. 
+random_simulation = runif(1500)
+
+# Triangular Distribution
+# K	= (c - a) / (b - a)
+# M	= (b - a) * (c - a)
+# N = (b - a) * (b - c)
+
+K = (peak_limit - lower_limit) / (upper_limit - lower_limit)
+M = (upper_limit - lower_limit) * (peak_limit - lower_limit)
+N = (upper_limit - lower_limit) * (upper_limit - peak_limit)
+
+# Applying the triangular distribution on the values. 
+triangle_dist = ifelse(random_simulation <= K, 
+                       round(lower_limit + sqrt(random_simulation * M), 0),
+                       round(upper_limit - sqrt((1 - random_simulation) * N), 0))
+
+simulation_matrix = data.frame(matrix(ncol = 4, nrow = 0))
+
+col_names = c("Demand Value", "No. of orders", "Minimum Cost", "Annual Orders")
+colnames(simulation_matrix) = col_names
+
+#Finding the Expected Values.
+length_triangular_dist = length(triangle_dist)
+
+for (j in 1:length_triangular_dist) 
+  {
+  optimise_cost = function(order_quantity) 
+    {
+    annual_demand = triangle_dist[j]
+    unit_cost = 78
+    supplier_ordering_cost = 225
+    unit_holding_cost = 0.175
+    no_of_days = 365
+    
+    total_cost = (supplier_ordering_cost * (annual_demand/order_quantity)) +
+      (order_quantity * ((unit_cost*unit_holding_cost)/no_of_days) *
+         (order_quantity/(annual_demand/no_of_days)) *
+         (annual_demand/order_quantity))
+    }
+  
+  order_quantity_threshold = c(300, 7000)
+  
+  cost_optimization = optimise(f = optimise_cost, 
+                               interval = order_quantity_threshold,
+                               lower = min(order_quantity_threshold),
+                               upper = max(order_quantity_threshold),
+                               maximum = FALSE)
+  
+  simulation_matrix[j, "Demand Value"] = triangle_dist[j]
+  simulation_matrix[j, "Order Quantity"] = cost_optimization$minimum
+  simulation_matrix[j, "Minimum Total Cost"] = cost_optimization$objective
+  simulation_matrix[j, "Annual Number of Orders"] =
+    triangle_dist[j]/cost_optimization$minimum
+  }
+
+#Checking the result of our simulation matrix
+summary(simulation_matrix)
+
+```
+
+```{r Second Task Part Two}
+
+# Testing best fit for distribution.
+#To find best fit minimum total cost
+weibull = fitdist(simulation_matrix$`Minimum Total Cost`, "weibull")
+gamma = fitdist(simulation_matrix$`Minimum Total Cost`, "gamma")
+norm = fitdist(simulation_matrix$`Minimum Total Cost`, "norm")
+unif = fitdist(simulation_matrix$`Minimum Total Cost`, "unif")
+
+plot(weibull)
+plot(gamma)
+plot(norm)
+plot(unif)
+
+#Performing Shapiro Test
+shapiro.test(simulation_matrix$`Minimum Total Cost`)
+
+```
+
+
+```{r Second Task Part Three}
+
+#To find best fit order quantity. 
+weibull = fitdist(simulation_matrix$`Order Quantity`, "weibull")
+gamma = fitdist(simulation_matrix$`Order Quantity`, "gamma")
+norm = fitdist(simulation_matrix$`Order Quantity`, "norm")
+unif = fitdist(simulation_matrix$`Order Quantity`, "unif")
+
+plot(weibull)
+plot(gamma)
+plot(norm)
+plot(unif)
+
+#Performing Shapiro Test
+shapiro.test(simulation_matrix$`Order Quantity`)
+
+```
+
+
+```{r Second Task Part Four}
+
+#To find best fit annual orders. 
+weibull = fitdist(simulation_matrix$`Annual Number of Orders`, "weibull")
+gamma = fitdist(simulation_matrix$`Annual Number of Orders`, "gamma")
+norm = fitdist(simulation_matrix$`Annual Number of Orders`, "norm")
+unif = fitdist(simulation_matrix$`Annual Number of Orders`, "unif")
+
+plot(weibull)
+plot(gamma)
+plot(norm)
+plot(unif)
+
+#Performing Shapiro Test
+shapiro.test(simulation_matrix$`Annual Number of Orders`)
+
+```
+

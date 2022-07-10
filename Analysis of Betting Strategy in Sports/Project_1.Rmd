@@ -1,0 +1,598 @@
+---
+title: ""
+output: html_document
+---
+
+Suppose that Boston Red Sox and New York Yankees (two American League baseball 
+teams) are scheduled to play a best of three(3) series. The winner of the series will be the first team that wins two of the three games. The probability that the Red Sox win a game in their home stadium is 0.58 and the probability that Yankees win their home game is 0.55. Next, suppose that you place a bet on each game played where you win $500 if the Red Sox win and you lose $520 if the Red Sox lose the game
+
+```{r}
+
+#Boston Red Sox team home stadium 
+P_boston_winning = 0.58
+P_boston_losing = 1 - P_boston_winning
+
+#New York Yankees home stadium
+P_newyork_winning = 0.55
+P_newyork_losing = 1 - P_newyork_winning  
+
+#You bet and if Red Sox wins you get $500 and if Red Sox lose you lose $520.
+
+```
+
+If the first game is played in New York, the second game is played in Boston, and the third game (if it becomes necessary) is in New York, then complete parts (i)-(v) below.
+(i) Calculate the probability that the Red Sox will win the series.
+
+```{r First Task Part One}
+
+#Boston Red Sox team home stadium 
+P_boston_winning = 0.58
+P_boston_losing = 1 - P_boston_winning
+
+#New York Yankees home stadium
+P_newyork_winning = 0.55
+P_newyork_losing = 1 - P_newyork_winning 
+
+#B = Boston N = New York
+#BB + BNB + NBB
+Prob = (P_newyork_losing * P_boston_winning) + (P_newyork_losing * P_boston_losing * P_newyork_losing) + (P_newyork_winning * P_boston_winning * P_newyork_losing)
+
+print(paste("The probability that Red Sox will win the series =", Prob))
+      
+```
+(ii) Construct a probability distribution for your net win (X) in the series. Calculate your expected net win (the mean of X) and the standard deviation of X.
+
+```{r First Task Part Two}
+
+#For net win
+X1 = 500 * P_newyork_losing - 520 * P_newyork_winning
+X2 = 500 * P_boston_winning - 520 * P_boston_losing
+X3 = 500 * P_newyork_losing - 520 * P_newyork_winning
+X_netwin = X1 + X2 + X3
+
+#For Standard deviation
+E_X1_2 = ((500)^2 * P_newyork_losing) + ((520)^2 * P_newyork_winning)
+E_X2_2 = ((500)^2 * P_boston_winning) + ((520)^2 * P_boston_losing)
+
+V_X1 = E_X1_2 - (X1)^2
+V_X2 = E_X2_2 - (X2)^2
+
+sd_X = sqrt(V_X1 + V_X1 + V_X2)
+  
+print(paste("The expected net win =", X_netwin))
+print(paste("The standard deviation =", sd_X))
+
+```
+
+(iii) Use Excel or R to create 10,000 random values for X. Let these random values be denoted by Y. Use these Y values to estimate your expected net win by using a 95% confidence interval. Does this confidence interval contain E(X)?
+
+```{r First Task Part Three}
+
+y = rnorm(10000, X_netwin, sd_X)
+y_mean = mean(y)
+y_sd = sd(y)
+
+cv = qnorm(0.975)
+
+upper = y_mean + ((1.96 * y_sd)/sqrt(10000))
+lower = y_mean - ((1.96 * y_sd)/sqrt(10000))
+
+print(paste("The upper limit =", upper))
+print(paste("The lower limit =", lower))
+
+#Does this confidence interval contain E(X). Yes 
+
+```
+
+(iv) Construct a frequency distribution for Y. Next, use the Chi-squared goodness of fit test to verify how closely the distribution of Y has estimated the distribution of X.
+
+```{r First Task Part Fourth}
+
+#Boston Red Sox team home stadium 
+P_boston_winning = 0.58
+P_boston_losing = 1 - P_boston_winning
+
+#New York Yankees home stadium
+P_newyork_winning = 0.55
+P_newyork_losing = 1 - P_newyork_winning 
+
+#ww = 1000 = 2610
+#wlw or lww = 480 = 2286 = 0.2286
+#ll = -1040 = 2310
+#wll or lwl = -540 = 2794 = 0.2794
+
+#ww = 0.261 x 10000 = 2,610
+#wlw = 0.08505 x 10000 = 850.5
+#ll = 0.231 x 10000 = 2,310
+#wll = 0.10395 x 10000 = 1039.5
+#lwl = 0.17545 x 10000 = 1754.5
+#lww = 0.14355 x 10000 = 1435.5
+
+observed = c(2286, 2310, 2610, 2794)
+#Values calculated by counting the random variables for the:
+#ww = 1000 
+#wlw or lww = 480 
+#ll = -1040 = 2310
+#wll or lwl = -540 
+p = c(0.2260, 0.2370, 0.2537, 0.2833)
+
+result = chisq.test(x = observed, p = p)
+  
+```
+
+Repeat part 1 above but assume that the first game is played in Boston, the second game is played in New York, and the third game (if it becomes necessary) is in Boston. 
+(i) Calculate the probability that the Red Sox will win the series.
+
+```{r Second Task Part One}
+
+#Boston Red Sox team home stadium 
+P_boston_winning = 0.58
+P_boston_losing = 1 - P_boston_winning
+
+#New York Yankees home stadium
+P_newyork_winning = 0.55
+P_newyork_losing = 1 - P_newyork_winning 
+
+#You bet and if Red Sox wins you get $500 and if Red Sox lose you lose $520.
+
+#B = Boston N = New York
+#BB + BNB + NBB
+Prob = (P_boston_winning * P_newyork_losing) + (P_boston_winning * P_newyork_winning * P_boston_winning) + (P_boston_losing * P_newyork_losing * P_boston_winning)
+
+print(paste("The probability that Red Sox will win the series =", Prob))
+
+```
+
+(ii) Construct a probability distribution for your net win (X) in the series. Calculate your expected net win (the mean of X) and the standard deviation of X.
+
+```{r Second Task Part Two}
+
+#For net win
+X1 = 500 * P_boston_winning - 520 * P_boston_losing
+X2 = 500 * P_newyork_losing - 520 * P_newyork_winning
+X3 = 500 * P_boston_winning - 520 * P_boston_losing
+X_netwin1 = X1 + X2 + X3
+  
+#For Standard deviation
+E_X1_2 = ((500)^2 * P_boston_winning) + ((520)^2 * P_boston_losing)
+E_X2_2 = ((500)^2 * P_newyork_losing) + ((520)^2 * P_newyork_winning)
+
+V_X1 = E_X1_2 - (X1)^2
+V_X2 = E_X2_2 - (X2)^2
+
+sd_X1 = sqrt(V_X1 + V_X1 + V_X2)
+
+print(paste("The expected net win =", X_netwin1))
+print(paste("The standard deviation =", sd_X1))
+
+```
+
+(iii) Use Excel or R to create 10,000 random values for X. Let these random values be denoted by Y. Use these Y values to estimate your expected net win by using a 95% confidence interval. Does this confidence interval contain E(X)?
+
+```{r Second Task Part Three}
+
+y = rnorm(10000, X_netwin1, sd_X1)
+y_mean = mean(y)
+y_sd = sd(y)
+
+upper = y_mean + ((1.96 * y_sd)/sqrt(10000))
+lower = y_mean - ((1.96 * y_sd)/sqrt(10000))
+
+print(paste("The upper limit =", upper))
+print(paste("The lower limit =", lower))
+
+#Does this confidence interval contain E(X). Yes 
+
+```
+
+(iv) Construct a frequency distribution for Y. Next, use the Chi-squared goodness of fit test to verify how closely the distribution of Y has estimated the distribution of X.
+
+```{r Second Task Part Fourth}
+
+#Boston Red Sox team home stadium 
+P_boston_winning = 0.58
+P_boston_losing = 1 - P_boston_winning
+
+#New York Yankees home stadium
+P_newyork_winning = 0.55
+P_newyork_losing = 1 - P_newyork_winning 
+
+#ww = 1000 = 2610
+#wlw or lww = 480 = 2,946.4 = 0.29464
+#ll = -1040 = 2310
+#wll or lwl = -540 = 2,133.6 = 0.21336
+
+#ww = 0.261 x 10000 = 2,610
+#wlw = 0.18502 x 10000 = 1850.2   
+#ll = 0.231 x 10000 = 2,310         
+#wll = 0.13398 x 10000 = 1,339.8
+#lwl = 0.07938 x 10000 = 793.8
+#lww = 0.10962 x 10000 = 1,096.2    
+
+observed = c(2610, 2946.4, 2133.6, 2310)
+
+#Values calculated by counting the random variables for the:
+#ww = 1000 
+#wlw or lww = 480 
+#ll = -1040 
+#wll or lwl = -540 
+p = c(0.2640, 0.2969, 0.2110, 0.2281)
+result = chisq.test(x = observed, p = p)
+
+```
+
+Repeat part 1 above but now assume that the series is a best of five(5) series where the first team that wins three games wins the series with games alternating between Boston and New York, with the first game being played in New York.
+(i) Calculate the probability that the Red Sox will win the series.
+
+```{r Third Task Part One}
+
+#Best of Five series. 
+#NBNBN - is the pattern in which matches will take place. 
+
+#Boston Red Sox team home stadium 
+P_boston_winning = 0.58
+P_boston_losing = 1 - P_boston_winning
+
+#New York Yankees home stadium
+P_newyork_winning = 0.55
+P_newyork_losing = 1 - P_newyork_winning 
+
+#WWW
+#WWLW
+#WLWW
+#LWWW  
+#WLWLW  
+#WLLWW  
+#LLWWW  
+#LWLWW  
+#WWLLW  
+#LWWLW  
+Prob = (P_newyork_losing * P_boston_winning * P_newyork_losing) + (P_newyork_losing * P_boston_winning * P_newyork_winning * P_boston_winning) + 
+(P_newyork_losing * P_boston_losing * P_newyork_losing * P_boston_winning) + 
+(P_newyork_winning * P_boston_winning * P_newyork_losing * P_boston_winning) + 
+(P_newyork_losing * P_boston_losing * P_newyork_losing * P_boston_losing * P_newyork_losing) + (P_newyork_losing * P_boston_losing * P_newyork_winning * P_boston_winning * P_newyork_losing) + (P_newyork_winning * P_boston_losing * P_newyork_losing * P_boston_winning * P_newyork_losing) + (P_newyork_winning * P_boston_winning * P_newyork_winning * P_boston_winning * P_newyork_losing) + (P_newyork_losing * P_boston_winning * P_newyork_winning * P_boston_losing * P_newyork_losing) + (P_newyork_winning * P_boston_winning * P_newyork_losing * P_boston_losing * P_newyork_losing)
+
+print(paste("The probability that Red Sox will win the series =", Prob))
+
+```
+
+(ii) Construct a probability distribution for your net win (X) in the series. Calculate your expected net win (the mean of X) and the standard deviation of X.
+
+```{r Third Task Part Two}
+
+#For net win
+X1 = 500 * P_newyork_losing - 520 * P_newyork_winning
+X2 = 500 * P_boston_winning - 520 * P_boston_losing
+X3 = 500 * P_newyork_losing - 520 * P_newyork_winning
+X4 = 500 * P_boston_winning - 520 * P_boston_losing
+X5 = 500 * P_newyork_losing - 520 * P_newyork_winning   
+X_netwin2 = X1 + X2 + X3 + X4 + X5
+  
+#For Standard deviation
+E_X1_2 = ((500)^2 * P_newyork_losing) + ((520)^2 * P_newyork_winning)
+E_X2_2 = ((500)^2 * P_boston_winning) + ((520)^2 * P_boston_losing)
+
+V_X1 = E_X1_2 - (X1)^2
+V_X2 = E_X2_2 - (X2)^2
+
+sd_X2 = sqrt(V_X1 + V_X1 + V_X2 + V_X1 + V_X2)
+
+print(paste("The expected net win =", X_netwin2))
+print(paste("The standard deviation =", sd_X2))
+
+```
+
+(iii) Use Excel or R to create 10,000 random values for X. Let these random values be denoted by Y. Use these Y values to estimate your expected net win by using a 95% confidence interval. Does this confidence interval contain E(X)?
+
+```{r Third Task Part Three}
+
+y = rnorm(10000, X_netwin2, sd_X2)
+y_mean = mean(y)
+y_sd = sd(y)
+
+upper = y_mean + ((1.96 * y_sd)/sqrt(10000))
+lower = y_mean - ((1.96 * y_sd)/sqrt(10000))
+
+print(paste("The upper limit =", upper))
+print(paste("The lower limit =", lower))
+
+#Does this confidence interval contain E(X). Yes 
+
+```
+
+(iv) Construct a frequency distribution for Y. Next, use the Chi-squared goodness of fit test to verify how closely the distribution of Y has estimated the distribution of X.
+
+```{r Third Task Part Fourth}
+
+#NBNBN
+#Boston Red Sox team home stadium 
+P_boston_winning = 0.58
+P_boston_losing = 1 - P_boston_winning
+
+#New York Yankees home stadium
+P_newyork_winning = 0.55
+P_newyork_losing = 1 - P_newyork_winning 
+
+#WWW = 1500 
+#WWLW or WLWW or LWWW = 980 
+#WLWLW or WLLWW or LLWWW or LWLWW or WWLLW or LWWLW = 460
+#LLL = -1560
+#LLWL or LWLL or WLLL = -1060
+#LWLWL or LWWLL or WWLLL or WLWLL or LLWWL or WLLWL = -560
+
+#WWW = 0.11745 X 10000 = 1174.5
+#WWLW = 0.083259 x 10000 = 832.59
+#WLWW = 0.049329 x 10000 = 493.29
+#LWWW = 0.083259 x 10000 = 832.59
+#WLWLW = 0.01607445 x 10000 = 160.7445
+#WLLWW = 0.02713095 x 10000 = 271.3095
+#LLWWW = 0.02713095 x 10000 = 271.3095  
+#LWLWW = 0.04579245 x 10000 = 457.9245  
+#WWLLW = 0.02713095 x 10000 = 271.3095 
+#LWWLW = 0.02713095 x 10000 = 271.3095     
+#LLL = 0.12705 x 10000 = 1270.5
+#LLWL = 0.043659 x 10000 = 436.59
+#LWLL = 0.073689 x 10000 = 736.89
+#WLLL = 0.043659 x 10000 = 436.59
+#LWLWL = 0.05596855 x 10000 = 559.6855
+#LWWLL = 0.03316005 x 10000 = 331.6005
+#WWLLL = 0.03316005 x 10000 = 331.6005
+#WLWLL = 0.01964655 x 10000 = 196.4655
+#LLWWL = 0.03316005 x 10000 = 331.6005 
+#WLLWL = 0.03316005 x 10000 = 331.6005
+#observed = c(1174.5, 832.59, 493.29, 832.59, 160.7445, 271.3095, 271.3095, 271.3095, 271.3095, 457.9245, 1270.5, 436.59, 436.59, 736.89, 559.6855, 331.6005, 331.6005, 331.6005, 196.4655, 331.6005)
+
+observed = c(1174.5, 1703.907, 1270.5, 1610.07, 2082.553, 2158.47)
+#Values calculated by counting the random variables for the:
+#WWW = 1500 
+#WWLW or WLWW or LWWW = 980 
+#WLWLW or WLLWW or LLWWW or LWLWW or WWLLW or LWWLW = 460
+#LLL = -1560
+#LLWL or LWLL or WLLL = -1060
+#LWLWL or LWWLL or WWLLL or WLWLL or LLWWL or WLLWL = -560
+p = c(0.1167, 0.1649, 0.1314, 0.1592, 0.2118, 0.2160)
+result = chisq.test(x = observed, p = p)
+
+```
+  
+Repeat part 1 above but now assume both teams will play the 2022 World Series. The series is a best of seven(7) series where the first team that wins four games wins the series. The team with home field advantage plays two games at home, three on the road(guest), and then if necessary two at home. Let’s assume Boston Red Sox has the home field advantage against New York Yankees.
+
+```{r Fourth Task Part One}
+
+#Best of Seven series. Team who wins first 4 games wins the series. 
+#BBNNNBB - is the pattern in which matches will take place. 
+
+#Boston Red Sox team home stadium 
+P_boston_winning = 0.58
+P_boston_losing = 1 - P_boston_winning
+
+#New York Yankees home stadium
+P_newyork_winning = 0.55
+P_newyork_losing = 1 - P_newyork_winning 
+
+#BBNNNBB
+#Boston wins all the games
+#BBBB = (P_boston_winning *P_boston_winning *P_newyork_losing *P_newyork_losing)
+
+#Boston wins 4 out of 5 games
+#NBBBB = (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_losing *P_newyork_losing)
+#BNBBB = (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_losing)
+#BBNBB = (P_boston_winning * P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_losing)
+#BBBNB = (P_boston_winning *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_losing)
+
+#Boston wins 4 out of 6 games
+#NBBBNB = (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_losing *P_newyork_winning *P_boston_winning)
+#NBBNBB = (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_losing *P_boston_winning)
+#NBNBBB = (P_boston_losing *P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_losing *P_boston_winning)
+#NNBBBB = (P_boston_losing *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_losing *P_boston_winning)
+#BNBBNB = (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_winning)
+#BNBNBB = (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_winning *P_newyork_losing)
+#BNNBBB = (P_boston_winning *P_boston_losing *P_newyork_winning *P_newyork_losing * P_newyork_losing)
+#BBNBNB = (P_boston_winning *P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_winning)
+#BBNNBB = (P_boston_winning *P_boston_winning *P_newyork_winning *P_newyork_winning *P_newyork_losing)
+#BBBNNB = (P_boston_winning *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_winning)
+
+#Boston wins 4 out of 7 games
+#NNNBBBB = (P_boston_losing *P_boston_losing *P_newyork_winning *P_newyork_losing *P_newyork_losing *P_boston_winning *P_boston_winning)
+#NNBNBBB = (P_boston_losing *P_boston_losing *P_newyork_losing *P_newyork_winning *P_newyork_losing *P_boston_winning *P_boston_winning)
+#NNBBNBB = (P_boston_losing *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_winning *P_boston_winning *P_boston_winning)
+#NNBBBNB = (P_boston_losing *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_losing *P_boston_losing *P_boston_winning)  
+#NBNNBBB = (P_boston_losing *P_boston_winning *P_newyork_winning *P_newyork_winning *P_newyork_losing *P_boston_winning *P_boston_winning)
+#NBNBNBB = (P_boston_losing *P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_winning *P_boston_winning *P_boston_winning)
+#NBNBBNB = (P_boston_losing *P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_losing *P_boston_losing *P_boston_winning)   
+#NBBNNBB = (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_winning *P_boston_winning *P_boston_winning)
+#NBBNBNB = (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_losing *P_boston_losing *P_boston_winning)  
+#NBBBNNB = (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_losing *P_newyork_winning *P_boston_losing *P_boston_winning)  
+
+#BBBNNNB = (P_boston_winning *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_winning *P_boston_losing *P_boston_winning)
+#BBNNNBB = (P_boston_winning *P_boston_winning *P_newyork_winning *P_newyork_winning *P_newyork_winning *P_boston_winning *P_boston_winning)
+#BNNNBBB = (P_boston_winning *P_boston_losing *P_newyork_winning *P_newyork_winning *P_newyork_losing *P_boston_winning *P_boston_winning)
+#BNNBNBB = (P_boston_winning *P_boston_losing *P_newyork_winning *P_newyork_losing *P_newyork_winning *P_boston_winning *P_boston_winning)
+#BNNBBNB = (P_boston_winning *P_boston_losing *P_newyork_winning *P_newyork_losing *P_newyork_losing *P_boston_losing *P_boston_winning)
+#BNBNBNB = (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_winning *P_newyork_losing *P_boston_losing *P_boston_winning)
+#BNBBNNB = (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_winning *P_boston_losing *P_boston_winning)
+#BNBNNBB = (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_winning *P_newyork_winning *P_boston_winning *P_boston_winning)
+
+Prob = (P_boston_winning *P_boston_winning *P_newyork_losing *P_newyork_losing) + (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_losing *P_newyork_losing) + (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_losing) + (P_boston_winning * P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_losing) + (P_boston_winning *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_losing) +
+(P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_losing *P_newyork_winning *P_boston_winning) + (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_losing *P_boston_winning) +
+(P_boston_losing *P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_losing *P_boston_winning) + (P_boston_losing *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_losing *P_boston_winning) +
+(P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_winning) + (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_winning *P_newyork_losing) + (P_boston_winning *P_boston_losing *P_newyork_winning *P_newyork_losing * P_newyork_losing) + (P_boston_winning *P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_winning) +
+(P_boston_winning *P_boston_winning *P_newyork_winning *P_newyork_winning *P_newyork_losing) + (P_boston_winning *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_winning) + (P_boston_losing *P_boston_losing *P_newyork_winning *P_newyork_losing *P_newyork_losing *P_boston_winning *P_boston_winning) + (P_boston_losing *P_boston_losing *P_newyork_losing *P_newyork_winning *P_newyork_losing *P_boston_winning *P_boston_winning) +
+(P_boston_losing *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_winning *P_boston_winning *P_boston_winning) + (P_boston_losing *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_losing *P_boston_losing *P_boston_winning) + (P_boston_losing *P_boston_winning *P_newyork_winning *P_newyork_winning *P_newyork_losing *P_boston_winning *P_boston_winning) + (P_boston_losing *P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_winning *P_boston_winning *P_boston_winning) +
+(P_boston_losing *P_boston_winning *P_newyork_winning *P_newyork_losing *P_newyork_losing *P_boston_losing *P_boston_winning) + (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_winning *P_boston_winning *P_boston_winning) + (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_losing *P_boston_losing *P_boston_winning) + (P_boston_losing *P_boston_winning *P_newyork_losing *P_newyork_losing *P_newyork_winning *P_boston_losing *P_boston_winning) + 
+(P_boston_winning *P_boston_winning *P_newyork_losing *P_newyork_winning *P_newyork_winning *P_boston_losing *P_boston_winning) + (P_boston_winning *P_boston_winning *P_newyork_winning *P_newyork_winning *P_newyork_winning *P_boston_winning *P_boston_winning) + (P_boston_winning *P_boston_losing *P_newyork_winning *P_newyork_winning *P_newyork_losing *P_boston_winning *P_boston_winning) + (P_boston_winning *P_boston_losing *P_newyork_winning *P_newyork_losing *P_newyork_winning *P_boston_winning *P_boston_winning) +
+(P_boston_winning *P_boston_losing *P_newyork_winning *P_newyork_losing *P_newyork_losing *P_boston_losing *P_boston_winning) + (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_winning *P_newyork_losing *P_boston_losing *P_boston_winning) + (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_losing *P_newyork_winning *P_boston_losing *P_boston_winning) + (P_boston_winning *P_boston_losing *P_newyork_losing *P_newyork_winning *P_newyork_winning *P_boston_winning *P_boston_winning)  
+  
+print(paste("The probability that Red Sox will win the series because of their home field advantage in the best of series =", Prob))
+
+```
+
+(ii) Construct a probability distribution for your net win (X) in the series. Calculate your expected net win (the mean of X) and the standard deviation of X.
+
+```{r Fourth Task Part Two}
+
+#For net win
+X1 = 500 * P_boston_winning - 520 * P_boston_losing
+X2 = 500 * P_boston_winning - 520 * P_boston_losing
+X3 = 500 * P_newyork_losing - 520 * P_newyork_winning
+X4 = 500 * P_newyork_losing - 520 * P_newyork_winning 
+X5 = 500 * P_newyork_losing - 520 * P_newyork_winning 
+X6 = 500 * P_boston_winning - 520 * P_boston_losing
+X7 = 500 * P_boston_winning - 520 * P_boston_losing   
+X_netwin3 = X1 + X2 + X3 + X4 + X5 + X6 + X7
+  
+#For Standard deviation
+E_X1_2 = ((500)^2 * P_newyork_losing) + ((520)^2 * P_newyork_winning)
+E_X2_2 = ((500)^2 * P_boston_winning) + ((520)^2 * P_boston_losing)
+
+V_X1 = E_X1_2 - (X1)^2
+V_X2 = E_X2_2 - (X2)^2
+
+sd_X3 = sqrt(V_X2 + V_X2 + V_X1 + V_X1 + V_X1 + V_X2 + V_X2)
+
+print(paste("The expected net win =", X_netwin3))
+print(paste("The standard deviation =", sd_X3))
+
+```
+
+(iii) Use Excel or R to create 10,000 random values for X. Let these random values be denoted by Y. Use these Y values to estimate your expected net win by using a 95% confidence interval. Does this confidence interval contain E(X)?
+
+```{r Fourth Task Part Three}
+
+y = rnorm(10000, X_netwin3, sd_X3)
+y_mean = mean(y)
+y_sd = sd(y)
+
+upper = y_mean + ((1.96 * y_sd)/sqrt(10000))
+lower = y_mean - ((1.96 * y_sd)/sqrt(10000))
+
+print(paste("The upper limit =", upper))
+print(paste("The lower limit =", lower))
+
+#Does this confidence interval contain E(X). Yes 
+
+```
+ 
+(iv) Construct a frequency distribution for Y. Next, use the Chi-squared goodness of fit test to verify how closely the distribution of Y has estimated the distribution of X.
+
+```{r Fourth Task Part Fourth}
+
+#BBNNNBB
+#Boston Red Sox team home stadium 
+P_boston_winning = 0.58
+P_boston_losing = 1 - P_boston_winning
+
+#New York Yankees home stadium
+P_newyork_winning = 0.55
+P_newyork_losing = 1 - P_newyork_winning 
+
+#BBNNNBB
+#Boston Winning games
+#BBBB = 2000
+#NBBBB or BNBBB or BBNBB or BBBNB  = 1480
+#NBBBNB or NBBNBB or NBNBBB or NNBBBB or BNBBNB or BNBNBB or BNNBBB or BBNBNB or BBNNBB or BBBNNB = 960
+#NNNBBBB or NNBNBBB or NNBBNBB or NNBBBNB or NBNNBBB or NBNBNBB or NBNBBNB or NBBNNBB or NBBNBNB or NBBBNNB or BBBNNNB or BBNNNBB or BNNNBBB or BNNBNBB or BNNBBNB or BNBNBNB or BNBBNNB or BNBNNBB = 440 
+
+#Boston Winnings 
+#BBNNNBB
+#Boston wins all the games
+#BBBB = 0.068121 * 10000 = 681.21
+
+#Boston wins 4 out of 5 games
+#NBBBB = 0.02219805 * 10000 = 221.9805
+#BNBBB = 0.02219805 * 10000 = 221.9805
+#BBNBB = 0.03746655 * 10000 = 374.6655
+#BBBNB = 0.03746655 * 10000 = 374.6655
+
+#Boston wins 4 out of 6 games
+#NBBBNB = 0.01573595 * 10000 = 157.3595
+#NBBNBB = 0.01573595 * 10000 = 157.3595
+#NBNBBB = 0.01573595 * 10000 = 157.3595
+#NNBBBB = 0.009323181 * 10000 = 93.23181
+#BNBBNB = 0.02713095 * 10000 = 271.3095
+#BNBNBB = 0.02713095 * 10000 = 271.3095
+#BNNBBB = 0.02713095 * 10000 = 271.3095
+#BBNBNB = 0.04579245 * 10000 = 457.9245
+#BBNNBB = 0.04579245 * 10000 = 457.9245
+#BBBNNB = 0.04579245 * 10000 = 457.9245
+
+#Boston wins 4 out of 7 games
+#NNNBBBB = 0.006609099 * 10000 = 66.09099
+#NNBNBBB = 0.006609099 * 10000 = 66.09099
+#NNBBNBB = 0.006609099 * 10000 = 66.09099
+#NNBBBNB = 0.003915736 * 10000 = 39.15736
+#NBNNBBB = 0.01115504 * 10000 = 111.5504
+#NBNBNBB = 0.01115504 * 10000 = 111.5504
+#NBNBBNB = 0.006609099 * 10000 = 66.09099   
+#NBBNNBB = 0.01115504 * 10000 = 111.5504
+#NBBNBNB = 0.006609099 * 10000 = 66.09099
+#NBBBNNB = 0.006609099 * 10000 = 66.09099 
+
+#BBBNNNB = 0.01115504 * 10000 = 111.5504
+#BBNNNBB = 0.01882782 * 10000 = 188.2782
+#BNNNBBB = 0.01115504 * 10000 = 111.5504
+#BNNBNBB = 0.01115504 * 10000 = 111.5504
+#BNNBBNB = 0.006609099 * 10000 = 66.09099
+#BNBNBNB = 0.006609099 * 10000 = 66.09099
+#BNBBNNB = 0.006609099 * 10000 = 66.09099
+#BNBNNBB = 0.01115504 * 10000 = 111.5504
+
+#New York winning games 
+#NNNN = -2080
+#BNNNN or NBNNN or NNBNN or NNNBN = -1580
+#BNNNBN or BNNBNN or BNBNNN or BBNNNN or NBNNBN or NBNBNN or NBBNNN or NNBNBN or NNBBNN or NNNBBN = -1080
+#BBBNNNN or BBNBNNN or BBNNBNN or BBNNNBN or BNBBNNN or BNBNBNN or BNBNNBN or BNNBBNN or BNNBNBN or BNNNBBN or NNNBBBN or NNBBBNN or NBBBNNN or NBBNBNN or NBBNNBN or NBNBNBN or NBNNBBN or NBNBBNN = -580
+
+#New York Winnings 
+#BBNNNBB
+#New York wins all the games
+#NNNN = (P_boston_losing *P_boston_losing *P_newyork_winning *P_newyork_winning) 0.053361 * 10000 = 533.61
+
+#New York wins 4 out of 5 games
+#BNNNN =  0.04052895 * 10000 = 405.2895
+#NBNNN =  0.04052895 * 10000 = 405.2895
+#NNBNN =  0.02401245 * 10000 = 240.1245
+#NNNBN =  0.02401245 * 10000 = 240.1245
+
+#New York wins 4 out of 6 games  
+#BNNNBN =  0.01392722 * 10000 = 139.2722
+#BNNBNN =  0.01392722 * 10000 = 139.2722
+#BNBNNN =  0.01392722 * 10000 = 139.2722
+#BBNNNN =  0.02350679 * 10000 = 235.0679
+#NBNNBN =  0.01392722 * 10000 = 139.2722
+#NBNBNN =  0.01392722 * 10000 = 139.2722
+#NBBNNN =  0.01392722 * 10000 = 139.2722
+#NNBNBN =  0.008251551 * 10000 = 82.51551
+#NNBBNN =  0.008251551 * 10000 = 82.51551
+#NNNBBN =  0.008251551 * 10000 = 82.51551
+
+#New York wins 4 out of 7 games
+#BBBNNNN =  0.008077788 * 10000 = 80.77788
+#BBNBNNN =  0.008077788 * 10000 = 80.77788
+#BBNNBNN =  0.008077788 * 10000 = 80.77788
+#BBNNNBN =  0.01363394 * 10000 = 136.3394
+#BNBBNNN =  0.0047859 * 10000 = 47.859
+#BNBNBNN =  0.0047859 * 10000 = 47.859
+#BNBNNBN =  0.008077788 * 10000 = 80.77788
+#BNNBBNN =  0.0047859 * 10000 = 47.859
+#BNNBNBN =  0.008077788 * 10000 = 80.77788
+#BNNNBBN =  0.008077788 * 10000 = 80.77788
+#NNNBBBN =  0.0047859 * 10000 = 47.859
+#NNBBBNN =  0.002835533 * 10000 = 28.35533
+#NBBBNNN =  0.0047859 * 10000 = 47.859
+#NBBNBNN =  0.0047859 * 10000 = 47.859
+#NBBNNBN =  0.008077788 * 10000 = 80.77788
+#NBNBNBN =  0.008077788 * 10000 = 80.77788
+#NBNNBBN =  0.008077788 * 10000 = 80.77788
+#NBNBBNN =  0.0047859 * 10000 = 47.859
+
+observed = c(681.21, 2753.012, 1603.107, 533.61, 1318.248, 626.693, 1193.292, 1290.828)
+p = c(1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8)
+
+result = chisq.test(x = observed, p = p)
+
+```
+
+ 
+ 
+ 
